@@ -33,6 +33,7 @@ except ImportError:
     import wx.lib.agw.aui as aui
 
 import wx
+import wx.lib.newevent
 
 try:
     import wx.lib.agw.flatnotebook as FN
@@ -103,6 +104,7 @@ class SingleWindowAuiManager(aui.AuiManager):
     def OnClose(self, event):
         event.Skip()
 
+EventServerCommand, EVT_SEVER_CMD = wx.lib.newevent.NewEvent()
 
 class GMFrame(wx.Frame):
     """Single Window Layout which will be parallelly developed next to the
@@ -257,6 +259,9 @@ class GMFrame(wx.Frame):
         wx.CallAfter(self.Raise)
 
         self._show_demo_map()
+
+        # bind events
+        self.Bind(EVT_SEVER_CMD, self.OnServerCommand)
 
     def _repaintLayersPaneMapDisplayToolbar(self):
         """Repaint Layers pane map display toolbar widget on the wxMac"""
@@ -754,6 +759,9 @@ class GMFrame(wx.Frame):
             self._auimgr.LoadPerspective(single_win_panes_layout_pos)
 
         self._auimgr.Update()
+
+    def OnServerCommand(self, event):
+        self.RunMenuCmd(None, ["g.region"])
 
     def BindEvents(self):
         # bindings

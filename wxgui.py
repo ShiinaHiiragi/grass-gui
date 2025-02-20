@@ -53,7 +53,9 @@ except ImportError:
 def get_version():
     global frame
     assert frame is not None
-    return frame.baseTitle
+    from main_window.frame import EventServerCommand
+    wx.PostEvent(frame, EventServerCommand())
+    return "0.1"
 
 
 class GMApp(wx.App):
