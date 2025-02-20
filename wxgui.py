@@ -31,6 +31,11 @@ from core.utils import registerPid, unregisterPid
 from core.settings import UserSettings
 
 import wx
+import threading
+from flask import Flask
+
+flask = Flask(__name__)
+frame = None
 
 # import adv and html before wx.App is created, otherwise
 # we get annoying "Debug: Adding duplicate image handler for 'Windows bitmap file'"
@@ -42,6 +47,13 @@ try:
     import wx.lib.agw.advancedsplash as SC
 except ImportError:
     SC = None
+
+
+@flask.route("/version", methods=["GET"])
+def get_version():
+    global frame
+    assert frame is not None
+    return frame.baseTitle
 
 
 class GMApp(wx.App):
@@ -90,7 +102,8 @@ class GMApp(wx.App):
             else:
                 from lmgr.frame import GMFrame
             try:
-                mainframe = GMFrame(
+                global frame
+                frame = GMFrame(
                     parent=None, id=wx.ID_ANY, workspace=self.workspaceFile
                 )
             except Exception as err:
@@ -109,8 +122,8 @@ class GMApp(wx.App):
                 else:
                     raise
             else:
-                mainframe.Show()
-                self.SetTopWindow(mainframe)
+                frame.Show()
+                self.SetTopWindow(frame)
 
         wx.CallAfter(show_main_gui)
 
@@ -170,6 +183,9 @@ def main(argv=None):
     # register GUI PID
     registerPid(os.getpid())
 
+    global flask
+    flask_target = lambda: flask.run(host="0.0.0.0", port=4000)
+    threading.Thread(target=flask_target, daemon=True).start()
     app.MainLoop()
 
 
