@@ -92,6 +92,9 @@ from startup.guiutils import (
 from grass.grassdb.checks import is_first_time_user
 from grass.grassdb.history import Status
 
+import threading
+response_event = threading.Event()
+response_value = None
 
 class SingleWindowAuiManager(aui.AuiManager):
     """Custom AuiManager class which override OnClose window
@@ -104,7 +107,6 @@ class SingleWindowAuiManager(aui.AuiManager):
     def OnClose(self, event):
         event.Skip()
 
-EventInitMapset, EVT_INIT_MAP = wx.lib.newevent.NewEvent()
 
 class GMFrame(wx.Frame):
     """Single Window Layout which will be parallelly developed next to the
@@ -259,9 +261,6 @@ class GMFrame(wx.Frame):
         wx.CallAfter(self.Raise)
 
         self._show_demo_map()
-
-        # bind events
-        self.Bind(EVT_INIT_MAP, self.OnInitMapset)
 
     def _repaintLayersPaneMapDisplayToolbar(self):
         """Repaint Layers pane map display toolbar widget on the wxMac"""
@@ -760,13 +759,16 @@ class GMFrame(wx.Frame):
 
         self._auimgr.Update()
 
-    def OnInitMapset(self, event) -> bool:
-        return self.datacatalog.tree.SwitchMapset(
-            grassdb=event.grassdb,
-            location=event.location,
-            mapset=event.mapset,
+    def InitMapset(self, grassdb, location, mapset) -> bool:
+        global response_value, response_event
+        response_value = self.datacatalog.tree.SwitchMapset(
+            grassdb=grassdb,
+            location=location,
+            mapset=mapset,
             show_confirmation=False
         )
+        print(response_value)
+        response_event.set()
 
     def BindEvents(self):
         # bindings

@@ -43,6 +43,9 @@ frame = None
 import wx.adv
 import wx.html
 
+FLASK_TIMEOUT = 10
+JSON_WRAPPER = lambda value: { "result": value }
+
 try:
     import wx.lib.agw.advancedsplash as SC
 except ImportError:
@@ -57,13 +60,22 @@ def get_version():
 def init_map():
     global frame
     assert frame is not None
-    from main_window.frame import EventInitMapset
-    wx.PostEvent(frame, EventInitMapset(
+
+    from main_window.frame import response_event
+    response_event.clear()
+
+    wx.CallAfter(
+        frame.InitMapset,
         grassdb="/home/ichinoe/grassdata",
         location="nc_basic_spm_grass7",
         mapset="PERMANENT"
-    ))
-    return ""
+    )
+
+    if response_event.wait(timeout=FLASK_TIMEOUT):
+        from main_window.frame import response_value
+        return JSON_WRAPPER(response_value)
+    else:
+        return JSON_WRAPPER(False)
 
 
 class GMApp(wx.App):
