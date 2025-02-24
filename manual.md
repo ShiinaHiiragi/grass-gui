@@ -1,5 +1,7 @@
 # Manual
 
+## Installation
+
 1. Download Grass v8.4
 
     ```shell
@@ -15,3 +17,9 @@
     sudo rm -r /usr/lib/grass84/gui/wxpython
     sudo mv ./grass-gui /usr/lib/grass84/gui/wxpython
     ```
+
+## Memo
+
+```python
+import gc; rid = lambda num: [obj for obj in gc.get_objects() if id(obj) == num][0]
+```
