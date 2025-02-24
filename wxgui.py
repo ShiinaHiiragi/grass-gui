@@ -94,7 +94,7 @@ def gcmd():
             return "OK"
     return "ERROR"
 
-@flask.route("/init/map", methods=["GET"])
+@flask.route("/init/map", methods=["POST"])
 def init_map():
     global frame
     assert frame is not None
@@ -102,11 +102,12 @@ def init_map():
     from main_window.frame import response_event
     response_event.clear()
 
+    params = request.get_json()
     wx.CallAfter(
         frame.InitMapset,
-        grassdb="/home/ichinoe/grassdata",
-        location="nc_basic_spm_grass7",
-        mapset="PERMANENT"
+        grassdb=params["grassdb"],
+        location=params["location"],
+        mapset=params["mapset"]
     )
 
     if response_event.wait(timeout=FLASK_TIMEOUT):
