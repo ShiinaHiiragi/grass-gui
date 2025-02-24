@@ -759,7 +759,7 @@ class GMFrame(wx.Frame):
 
         self._auimgr.Update()
 
-    def InitCommand(self, *args, **kwargs) -> bool:
+    def GCommand(self, *args, **kwargs) -> bool:
         global response_value, response_event
         response_value = RunCommand(*args, **kwargs)
         response_event.set()

@@ -33,7 +33,7 @@ from core.settings import UserSettings
 
 import wx
 import threading
-from flask import Flask
+from flask import Flask, request
 
 flask = Flask(__name__)
 frame = None
@@ -72,27 +72,22 @@ def jsonify(obj: any):
 def get_version():
     return "0.1"
 
-@flask.route("/init/cmd", methods=["GET"])
-def init_cmd():
+@flask.route("/gcmd", methods=["POST"])
+def gcmd():
     global frame
     assert frame is not None
 
     from main_window.frame import response_event
     response_event.clear()
 
-    wx.CallAfter(
-        frame.InitCommand,
-        "g.mapset",
-        dbase="/home/ichinoe/grassdata",
-        project="nc_basic_spm_grass7",
-        mapset="PERMANENT"
-    )
+    params = request.get_json()
+    wx.CallAfter(frame.GCommand, params["cmd"], **params["kwargs"])
 
     if response_event.wait(timeout=FLASK_TIMEOUT):
         from main_window.frame import response_value
-        return JSON_WRAPPER(response_value == 0)
-    else:
-        return JSON_WRAPPER(False)
+        if response_value == 0:
+            return "OK"
+    return "ERROR"
 
 @flask.route("/init/map", methods=["GET"])
 def init_map():
@@ -111,12 +106,12 @@ def init_map():
 
     if response_event.wait(timeout=FLASK_TIMEOUT):
         from main_window.frame import response_value
-        return JSON_WRAPPER(response_value)
-    else:
-        return JSON_WRAPPER(False)
+        if response_value:
+            return "OK"
+    return "ERROR"
 
 
-@flask.route("/info", methods=["GET"])
+@flask.route("/dump", methods=["GET"])
 def status_dump():
     return {
         "layers": [
@@ -253,7 +248,8 @@ def main(argv=None):
     registerPid(os.getpid())
 
     global flask
-    flask_target = lambda: flask.run(host="0.0.0.0", port=4000)
+    flask_port = os.environ.get("FLASK_PORT", 8000)
+    flask_target = lambda: flask.run(host="0.0.0.0", port=flask_port)
     threading.Thread(target=flask_target, daemon=True).start()
     app.MainLoop()
 
