@@ -51,11 +51,19 @@ except ImportError:
 
 @flask.route("/version", methods=["GET"])
 def get_version():
+    return "0.1"
+
+@flask.route("/init/map", methods=["GET"])
+def init_map():
     global frame
     assert frame is not None
-    from main_window.frame import EventServerCommand
-    wx.PostEvent(frame, EventServerCommand())
-    return "0.1"
+    from main_window.frame import EventInitMapset
+    wx.PostEvent(frame, EventInitMapset(
+        grassdb="/home/ichinoe/grassdata",
+        location="nc_basic_spm_grass7",
+        mapset="PERMANENT"
+    ))
+    return ""
 
 
 class GMApp(wx.App):
