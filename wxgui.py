@@ -33,7 +33,12 @@ from core.settings import UserSettings
 
 import wx
 import threading
+
+import logging
 from flask import Flask, request
+
+flask_log = logging.getLogger("werkzeug")
+flask_log.setLevel(logging.ERROR)
 
 flask = Flask(__name__)
 frame = None
