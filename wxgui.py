@@ -19,6 +19,7 @@ This program is free software under the GNU General Public License
 
 import os
 import sys
+import json
 import getopt
 
 # i18n is taken care of in the grass library code.
@@ -51,6 +52,21 @@ try:
 except ImportError:
     SC = None
 
+
+def jsonify(obj: any):
+    assert hasattr(obj, "__dict__")
+    def jsonable(sub_obj):
+        try:
+            json.dumps(sub_obj)
+            return True
+        except (TypeError, OverflowError):
+            return False
+
+    return json.dumps({
+        key: value
+        for key, value in obj.__dict__.items()
+        if jsonable(value)
+    })
 
 @flask.route("/version", methods=["GET"])
 def get_version():
@@ -99,6 +115,15 @@ def init_map():
     else:
         return JSON_WRAPPER(False)
 
+
+@flask.route("/info", methods=["GET"])
+def status_dump():
+    return {
+        "layers": [
+            json.loads(jsonify(item))
+            for item in frame.pg_panel.maptree.Map.layers
+        ]
+    }
 
 class GMApp(wx.App):
     def __init__(self, workspace=None):
