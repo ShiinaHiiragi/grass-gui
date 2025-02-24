@@ -759,6 +759,11 @@ class GMFrame(wx.Frame):
 
         self._auimgr.Update()
 
+    def InitCommand(self, *args, **kwargs) -> bool:
+        global response_value, response_event
+        response_value = RunCommand(*args, **kwargs)
+        response_event.set()
+
     def InitMapset(self, grassdb, location, mapset) -> bool:
         global response_value, response_event
         response_value = self.datacatalog.tree.SwitchMapset(
@@ -767,7 +772,6 @@ class GMFrame(wx.Frame):
             mapset=mapset,
             show_confirmation=False
         )
-        print(response_value)
         response_event.set()
 
     def BindEvents(self):

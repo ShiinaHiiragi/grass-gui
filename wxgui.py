@@ -44,7 +44,7 @@ import wx.adv
 import wx.html
 
 FLASK_TIMEOUT = 10
-JSON_WRAPPER = lambda value: { "result": value }
+JSON_WRAPPER = lambda value: { "code": value }
 
 try:
     import wx.lib.agw.advancedsplash as SC
@@ -55,6 +55,28 @@ except ImportError:
 @flask.route("/version", methods=["GET"])
 def get_version():
     return "0.1"
+
+@flask.route("/init/cmd", methods=["GET"])
+def init_cmd():
+    global frame
+    assert frame is not None
+
+    from main_window.frame import response_event
+    response_event.clear()
+
+    wx.CallAfter(
+        frame.InitCommand,
+        "g.mapset",
+        dbase="/home/ichinoe/grassdata",
+        project="nc_basic_spm_grass7",
+        mapset="PERMANENT"
+    )
+
+    if response_event.wait(timeout=FLASK_TIMEOUT):
+        from main_window.frame import response_value
+        return JSON_WRAPPER(response_value == 0)
+    else:
+        return JSON_WRAPPER(False)
 
 @flask.route("/init/map", methods=["GET"])
 def init_map():
