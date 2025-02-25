@@ -19,7 +19,14 @@
     ```
 
 ## Memo
+1. Spell for startup:
 
-```python
-import gc; rid = lambda num: [obj for obj in gc.get_objects() if id(obj) == num][0]
-```
+    ```shell
+    nome-terminal -- /bin/bash -ic "conda activate grass; LD_PRELOAD=/lib/x86_64-linux-gnu/libffi.so.7 FLASK_PORT=8000 /app/bin/grass --gui ~/grassdata/nc_basic_spm_grass7/PERMANENT"
+    ```
+
+2. Rite for debugging:
+
+    ```python
+    import gc; rid = lambda num: [obj for obj in gc.get_objects() if id(obj) == num][0]
+    ```

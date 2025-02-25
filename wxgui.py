@@ -36,6 +36,7 @@ import threading
 
 import logging
 from flask import Flask, request
+from werkzeug.serving import make_server
 
 flask_log = logging.getLogger("werkzeug")
 flask_log.setLevel(logging.ERROR)
@@ -229,6 +230,21 @@ def process_opt(opts, args):
 
     return workspaceFile
 
+class FlaskThread(threading.Thread):
+    def __init__(self):
+        super().__init__(daemon=True)
+        flask_port = os.environ.get("FLASK_PORT", 8000)
+        self.server = make_server("0.0.0.0", flask_port, flask)
+        self.ctx = flask.app_context()
+        self.ctx.push()
+
+    def run(self):
+        print("Starting Flask server...")
+        self.server.serve_forever()
+
+    def shutdown(self):
+        self.server.shutdown()
+
 
 def main(argv=None):
     if argv is None:
@@ -253,10 +269,8 @@ def main(argv=None):
     # register GUI PID
     registerPid(os.getpid())
 
-    global flask
-    flask_port = os.environ.get("FLASK_PORT", 8000)
-    flask_target = lambda: flask.run(host="0.0.0.0", port=flask_port)
-    threading.Thread(target=flask_target, daemon=True).start()
+    flask_thread = FlaskThread()
+    flask_thread.start()
     app.MainLoop()
 
 
