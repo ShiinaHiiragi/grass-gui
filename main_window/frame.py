@@ -774,6 +774,17 @@ class GMFrame(wx.Frame):
         )
         response_event.set()
 
+    def DisplayLayer(self, query) -> bool:
+        global response_value, response_event
+        try:
+            tree = self.datacatalog.tree
+            node = tree._model.SearchNodes(**query)[0]
+            tree.OnDoubleClick(node)
+            response_value = True
+        except:
+            response_value = False
+        response_event.set()
+
     def BindEvents(self):
         # bindings
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindowOrExit)

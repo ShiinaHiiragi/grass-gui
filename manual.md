@@ -22,7 +22,7 @@
 1. Spell for startup:
 
     ```shell
-    nome-terminal -- /bin/bash -ic "conda activate grass; LD_PRELOAD=/lib/x86_64-linux-gnu/libffi.so.7 FLASK_PORT=8000 /app/bin/grass --gui ~/grassdata/nc_basic_spm_grass7/PERMANENT"
+    gnome-terminal -- /bin/bash -ic "conda activate grass; LD_PRELOAD=/lib/x86_64-linux-gnu/libffi.so.7 FLASK_PORT=8000 /app/bin/grass --gui ~/grassdata/nc_basic_spm_grass7/PERMANENT"
     ```
 
 2. Rite for debugging:

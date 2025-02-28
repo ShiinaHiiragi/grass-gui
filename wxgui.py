@@ -117,6 +117,25 @@ def init_map():
             return "OK"
     return "ERROR"
 
+@flask.route("/init/layer", methods=["POST"])
+def init_layer():
+    global frame
+    assert frame is not None
+
+    from main_window.frame import response_event
+    response_event.clear()
+
+    params = request.get_json()
+    wx.CallAfter(
+        frame.DisplayLayer,
+        query=params["query"]
+    )
+
+    if response_event.wait(timeout=FLASK_TIMEOUT):
+        from main_window.frame import response_value
+        if response_value:
+            return "OK"
+    return "ERROR"
 
 @flask.route("/dump", methods=["GET"])
 def status_dump():
@@ -239,7 +258,6 @@ class FlaskThread(threading.Thread):
         self.ctx.push()
 
     def run(self):
-        print("Starting Flask server...")
         self.server.serve_forever()
 
     def shutdown(self):
