@@ -7,7 +7,7 @@
     ```shell
     sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
     sudo apt update
-    sudo apt install grass
+    sudo apt install grass=8.4.1-1~jammy1
     ```
 
 2. Download the repo and replace raw scripts
