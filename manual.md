@@ -28,5 +28,13 @@
 2. Rite for debugging:
 
     ```python
-    import gc; rid = lambda num: [obj for obj in gc.get_objects() if id(obj) == num][0]
+    import gc
+    from pprint import pprint
+    rid = lambda num: [obj for obj in gc.get_objects() if id(obj) == num][0]
+    ```
+
+    try to print it:
+
+    ```python
+    print(f"import gc; from pprint import pprint; rid = lambda num: [obj for obj in gc.get_objects() if id(obj) == num][0]; frame=rid({id(frame)})")
     ```
