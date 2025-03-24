@@ -59,20 +59,11 @@ except ImportError:
     SC = None
 
 
-def jsonify(obj: any):
-    assert hasattr(obj, "__dict__")
-    def jsonable(sub_obj):
-        try:
-            json.dumps(sub_obj)
-            return True
-        except (TypeError, OverflowError):
-            return False
-
-    return json.dumps({
-        key: value
-        for key, value in obj.__dict__.items()
-        if jsonable(value)
-    })
+def prejsonify(obj: any):
+    return json.loads(json.dumps(
+        obj.__dict__ if hasattr(obj, "__dict__") else obj,
+        default=lambda _: "N/A"
+    ))
 
 @flask.route("/version", methods=["GET"])
 def get_version():
@@ -157,11 +148,11 @@ def init_scale():
 
 @flask.route("/dump", methods=["GET"])
 def status_dump():
+    global frame
+    assert frame is not None
+
     return {
-        "layers": [
-            json.loads(jsonify(item))
-            for item in frame.pg_panel.maptree.Map.layers
-        ]
+        "layers": [prejsonify(item) for item in frame.pg_panel.maptree.Map.layers]
     }
 
 @flask.route("/gcmd", methods=["POST"])
@@ -177,10 +168,10 @@ def gcmd():
 
     if response_event.wait(timeout=FLASK_TIMEOUT):
         from main_window.frame import response_value
-        return json.dumps(
-            response_value,
-            default=lambda _: "<Not Serializable>"
-        )
+        return {
+            "returncode": response_value[0],
+            "stdout": json.loads(response_value[1])
+        }
     return "ERROR"
 
 class GMApp(wx.App):

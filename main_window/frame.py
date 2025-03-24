@@ -808,6 +808,7 @@ class GMFrame(wx.Frame):
             *args,
             read=True,
             getErrorMsg=True,
+            format="json",
             **kwargs
         )
         response_event.set()
