@@ -153,7 +153,10 @@ def status_dump():
 
     return {
         "layers": [prejsonify(item) for item in frame.pg_panel.maptree.Map.layers],
-        "layers_window": [prejsonify(item) for item in frame.pg_panel.maptree._itemWithWindow],
+        "windows": [{
+            "name": item._data[0]["maplayer"].name,
+            **prejsonify(item)
+        } for item in frame.pg_panel.maptree._itemWithWindow],
         "toolbars": {
             "keys": list(frame.mainnotebook._tabs._pages[0].window.toolbars.keys()),
             "shown": frame.mainnotebook._tabs._pages[0].window.toolbars["map"].IsShown(),
@@ -181,9 +184,13 @@ def gcmd():
 
     if response_event.wait(timeout=FLASK_TIMEOUT):
         from main_window.frame import response_value
+        print(response_value[2])
         return {
             "returncode": response_value[0],
-            "stdout": json.loads(response_value[1])
+            "stdout": json.loads(response_value[1]) \
+                if "format" in params["kwargs"] \
+                    and params["kwargs"]["format"] == "json" \
+                else response_value[1]
         }
     return "ERROR"
 
