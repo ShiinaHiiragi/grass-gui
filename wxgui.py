@@ -152,7 +152,18 @@ def status_dump():
     assert frame is not None
 
     return {
-        "layers": [prejsonify(item) for item in frame.pg_panel.maptree.Map.layers]
+        "layers": [prejsonify(item) for item in frame.pg_panel.maptree.Map.layers],
+        "layers_window": [prejsonify(item) for item in frame.pg_panel.maptree._itemWithWindow],
+        "toolbars": {
+            "keys": list(frame.mainnotebook._tabs._pages[0].window.toolbars.keys()),
+            "shown": frame.mainnotebook._tabs._pages[0].window.toolbars["map"].IsShown()
+        },
+        "statusbar": {
+            "mode": frame.mainnotebook._tabs._pages[0].window.statusbarManager._mode,
+            "scale": frame.mainnotebook._tabs._pages[0].window.GetMapScale()
+        },
+        "region": frame.mainnotebook._tabs._pages[0].window.Map.region,
+        "output": frame.goutput.cmdOutput.GetText()
     }
 
 @flask.route("/gcmd", methods=["POST"])
