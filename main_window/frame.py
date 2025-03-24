@@ -759,9 +759,16 @@ class GMFrame(wx.Frame):
 
         self._auimgr.Update()
 
-    def GCommand(self, *args, **kwargs) -> bool:
+    def InitDisableCmd(self) -> bool:
         global response_value, response_event
-        response_value = RunCommand(*args, **kwargs)
+        try:
+            self.goutput.cmdPrompt.ClearAll()
+            self.goutput.cmdPrompt.WriteText("The console is disabled")
+            self.goutput.cmdPrompt.Disable()
+            self.goutput.btnClear.Disable()
+            response_value = True
+        except:
+            response_value = False
         response_event.set()
 
     def InitMapset(self, grassdb, location, mapset) -> bool:
@@ -774,6 +781,16 @@ class GMFrame(wx.Frame):
         )
         response_event.set()
 
+    def InitMapScale(self, scale: int) -> bool:
+        global response_value, response_event
+        try:
+            self.mainnotebook._tabs._pages[0].window.SetMapScale(scale)
+            self.mainnotebook._tabs._pages[0].window.OnRender(None)
+            response_value = True
+        except:
+            response_value = False
+        response_event.set()
+
     def DisplayLayer(self, query) -> bool:
         global response_value, response_event
         try:
@@ -784,6 +801,17 @@ class GMFrame(wx.Frame):
         except:
             response_value = False
         response_event.set()
+
+    def GCommand(self, *args, **kwargs) -> any:
+        global response_value, response_event
+        response_value = RunCommand(
+            *args,
+            read=True,
+            getErrorMsg=True,
+            **kwargs
+        )
+        response_event.set()
+        return response_value
 
     def BindEvents(self):
         # bindings

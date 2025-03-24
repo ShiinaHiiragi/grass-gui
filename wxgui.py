@@ -78,20 +78,18 @@ def jsonify(obj: any):
 def get_version():
     return "0.1"
 
-@flask.route("/gcmd", methods=["POST"])
-def gcmd():
+@flask.route("/init/cmd", methods=["GET"])
+def init_cmd():
     global frame
     assert frame is not None
 
     from main_window.frame import response_event
     response_event.clear()
-
-    params = request.get_json()
-    wx.CallAfter(frame.GCommand, params["cmd"], **params["kwargs"])
+    wx.CallAfter(frame.InitDisableCmd)
 
     if response_event.wait(timeout=FLASK_TIMEOUT):
         from main_window.frame import response_value
-        if response_value == 0:
+        if response_value:
             return "OK"
     return "ERROR"
 
@@ -137,6 +135,26 @@ def init_layer():
             return "OK"
     return "ERROR"
 
+@flask.route("/init/scale", methods=["POST"])
+def init_scale():
+    global frame
+    assert frame is not None
+
+    from main_window.frame import response_event
+    response_event.clear()
+
+    params = request.get_json()
+    wx.CallAfter(
+        frame.InitMapScale,
+        scale=params["scale"]
+    )
+
+    if response_event.wait(timeout=FLASK_TIMEOUT):
+        from main_window.frame import response_value
+        if response_value:
+            return "OK"
+    return "ERROR"
+
 @flask.route("/dump", methods=["GET"])
 def status_dump():
     return {
@@ -145,6 +163,25 @@ def status_dump():
             for item in frame.pg_panel.maptree.Map.layers
         ]
     }
+
+@flask.route("/gcmd", methods=["POST"])
+def gcmd():
+    global frame
+    assert frame is not None
+
+    from main_window.frame import response_event
+    response_event.clear()
+
+    params = request.get_json()
+    wx.CallAfter(frame.GCommand, params["cmd"], **params["kwargs"])
+
+    if response_event.wait(timeout=FLASK_TIMEOUT):
+        from main_window.frame import response_value
+        return json.dumps(
+            response_value,
+            default=lambda _: "<Not Serializable>"
+        )
+    return "ERROR"
 
 class GMApp(wx.App):
     def __init__(self, workspace=None):
