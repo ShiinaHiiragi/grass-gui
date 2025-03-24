@@ -67,7 +67,7 @@ def prejsonify(obj: any):
 
 @flask.route("/version", methods=["GET"])
 def get_version():
-    return "0.1"
+    return "1.0"
 
 @flask.route("/init/cmd", methods=["GET"])
 def init_cmd():
