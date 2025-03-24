@@ -156,7 +156,9 @@ def status_dump():
         "layers_window": [prejsonify(item) for item in frame.pg_panel.maptree._itemWithWindow],
         "toolbars": {
             "keys": list(frame.mainnotebook._tabs._pages[0].window.toolbars.keys()),
-            "shown": frame.mainnotebook._tabs._pages[0].window.toolbars["map"].IsShown()
+            "shown": frame.mainnotebook._tabs._pages[0].window.toolbars["map"].IsShown(),
+            "layer": prejsonify(frame.mainnotebook._tabs._pages[0].window.toolbars["vdigit"].mapLayer) \
+                if "vdigit" in frame.mainnotebook._tabs._pages[0].window.toolbars else None
         },
         "statusbar": {
             "mode": frame.mainnotebook._tabs._pages[0].window.statusbarManager._mode,
@@ -184,6 +186,12 @@ def gcmd():
             "stdout": json.loads(response_value[1])
         }
     return "ERROR"
+
+@flask.route("/quit", methods=["POST"])
+def quit():
+    global frame
+    assert frame is not None
+    wx.CallAfter(frame._quitGRASS)
 
 class GMApp(wx.App):
     def __init__(self, workspace=None):
@@ -251,6 +259,7 @@ class GMApp(wx.App):
                 else:
                     raise
             else:
+                frame.Maximize(True)
                 frame.Show()
                 self.SetTopWindow(frame)
 
